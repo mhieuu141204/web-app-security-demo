@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: secure-app-deployment
+  labels:
+    app: secure-web-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: secure-web-app
+  template:
+    metadata:
+      labels:
+        app: secure-web-app
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        
+      containers: 
+      - name: web-app
+        image: my-app-secure:latest # Image đã hardening
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets     # Tên Secret đã tạo
+              key: DB_PASSWORD      # Khóa trong Secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: secure-app-service
+spec:
+  selector:
+    app: secure-web-app
+  ports:
+    - protocol: TCP
+      port: 8088
+      targetPort: 8080
+  type: LoadBalancer

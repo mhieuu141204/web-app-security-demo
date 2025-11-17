@@ -1,0 +1,31 @@
+# GIAI ĐOẠN 1: BUILD (Dùng Base Image đầy đủ cho các công cụ build)
+FROM node:20 AS builder
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+
+# Xóa các gói dependency cần thiết cho build nhưng không cần cho runtime
+RUN npm prune --production
+
+# GIAI ĐOẠN 2: RUNTIME
+FROM node:20-slim 
+WORKDIR /app
+
+# 1. Thêm user và group không có đặc quyền
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+# 2. SAO CHÉP TỆP
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/server.js .
+COPY --from=builder /app/package.json .
+
+# 3. THAY ĐỔI QUYỀN SỞ HỮU VÀO CUỐI
+RUN chown -R appuser:appuser /app  # Đảm bảo appuser sở hữu tất cả
+
+# 4. Đặt user không phải root cho quá trình chạy container
+USER appuser
+
+EXPOSE 8080
+CMD ["npm", "start"]

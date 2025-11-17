@@ -1,0 +1,21 @@
+# Sử dụng Base Image lớn và có nhiều thành phần không cần thiết.
+# Base Image 'node:20' là phiên bản Debian đầy đủ, không phải slim/alpine.
+FROM node:20 
+
+# Mặc định, các lệnh tiếp theo sẽ chạy dưới quyền root (user mặc định của Node.js image).
+# Việc chạy với quyền root tạo ra rủi ro bảo mật lớn nếu container bị tấn công.
+
+WORKDIR /app
+
+# Sao chép tất cả các tệp từ thư mục hiện tại vào container.
+# Điều này bao gồm các tệp không cần thiết
+COPY . . 
+
+# Cài đặt dependency. Các tệp cài đặt và cache cũng được lưu vào Image cuối cùng.
+RUN npm install 
+
+# Mở cổng 8080
+EXPOSE 8080 
+
+# Lệnh khởi động (vẫn chạy dưới quyền root)
+CMD ["npm", "start"]

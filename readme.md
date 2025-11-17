@@ -48,10 +48,12 @@ Service được cấu hình sử dụng cổng **8088** trong `deployment.yaml`
 
 ### Build và Quét Trivy Image "Xấu" để so sánh
 docker build -t my-app-bad:latest -f Dockerfile.bad .
+
 trivy image my-app-bad:latest
 
 ### Build và Quét Trivy Image (Sử dụng kỹ thuật Hardening, Multi-Stage Build, và user non-root)
 docker build -t my-app-secure:latest -f Dockerfile.secure .
+
 trivy image my-app-secure:latest
 
 ### Xóa Secret cũ (nếu có)
@@ -78,4 +80,5 @@ kubectl get svc
 
 ### Tài khoản demo (Tham số bí mật):
 Vai trò     | Tên tham số | Giá trị được truyền | Ghi chú
+
 Mật khẩu DB | DB_PASSWORD | minhhieuz20004      | Giá trị được lấy từ K8s Secret
